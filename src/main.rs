@@ -29,13 +29,13 @@ use xbar_core::system_monitor::SystemMonitor;
 
 static _START: Once = Once::new();
 
-// const NERD_FONT: Font = Font::with_name("SauceCodePro NerdFont Regular");
-const NERD_FONT: Font = Font::with_name("NotoEmoji Regular");
+// const NERD_FONT: Font = Font::new("SauceCodePro NerdFont Regular");
+const NERD_FONT: Font = Font::new("NotoEmoji Regular");
 
 fn main() -> iced::Result {
     let args: Vec<String> = env::args().collect();
     let application_id = "dev.iced.bar".to_string();
-    let shared_path = args.get(1).cloned().unwrap_or_default();
+    let shared_path = args.iter().skip(1).last().cloned().unwrap_or_default();
 
     if let Err(e) = initialize_logging("iced_bar", &shared_path) {
         eprintln!("Failed to initialize logging: {}", e);
@@ -139,7 +139,7 @@ impl IcedBar {
 
     fn new() -> Self {
         let args: Vec<String> = env::args().collect();
-        let shared_path = args.get(1).cloned().unwrap_or_default();
+        let shared_path = args.iter().skip(1).last().cloned().unwrap_or_default();
 
         let shared_buffer_rc =
             SharedRingBuffer::create_shared_ring_buffer_aux(&shared_path).map(Arc::new);
@@ -441,7 +441,7 @@ impl IcedBar {
         if self.transparent {
             theme::Style {
                 background_color: Color::TRANSPARENT,
-                text_color: theme.palette().text,
+                text_color: theme.palette().background.base.text,
             }
         } else {
             theme::default(theme)
@@ -603,10 +603,10 @@ impl IcedBar {
             .width(120)
             .style(|theme: &Theme, status: slider::Status| {
                 let palette = theme.palette();
-                let active = palette.primary;
+                let active = palette.primary.base.color;
                 let hovered = Color {
-                    a: (palette.primary.a + 0.15).min(1.0),
-                    ..palette.primary
+                    a: (active.a + 0.15).min(1.0),
+                    ..active
                 };
 
                 let rail = match status {
